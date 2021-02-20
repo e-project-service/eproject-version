@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.github.xiaoyao9184.eproject.version.config.ApiVersionAutoConfiguration

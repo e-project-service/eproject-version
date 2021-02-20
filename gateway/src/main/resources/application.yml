@@ -1,0 +1,131 @@
+
+
+---
+
+spring:
+  profiles: dev
+  cloud:
+    gateway:
+      httpclient:
+        proxy:
+          port: 8888
+          host: me
+
+eproject:
+  auth:
+    domain: auth.eproject.local:16666
+  admin:
+    domain: admin.eproject.local:2333
+  eureka:
+    domain: eureka.eproject.local:2337
+  version:
+    domain: me:2340
+
+logging:
+  level:
+    ROOT: DEBUG
+    org.springframework.cloud.gateway: DEBUG
+
+
+---
+
+spring:
+  profiles: test
+
+eproject:
+  auth:
+    domain: auth.eproject.com:16666
+  admin:
+    domain: admin.eproject.com:2333
+  eureka:
+    domain: eureka.eproject.com:2337
+  version:
+    domain: version.eproject.com:2340
+
+logging:
+  level:
+    ROOT: INFO
+
+
+---
+
+spring:
+  profiles: prod
+
+eproject:
+  auth:
+    domain: auth.eproject.com:16666
+  admin:
+    domain: admin.eproject.com:2333
+  eureka:
+    domain: eureka.eproject.com:2337
+  version:
+    domain: version.eproject.com:2340
+
+---
+
+spring:
+  profiles: docker
+
+eproject:
+  auth:
+    domain: auth.eproject.com:16666
+  admin:
+    domain: eproject-admin:2333
+  eureka:
+    domain: eproject-eureka:2337
+  version:
+    domain: eproject-version:2340
+
+---
+
+server:
+  port: 12340
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+spring:
+  application:
+    name: eProject-VersionGateway
+  boot:
+    admin:
+      client:
+        url: http://${eproject.admin.domain}/admin-service
+        apiPath: /api/applications
+  cloud:
+    gateway:
+      routes:
+        - id: hb
+          uri: http://httpbin.org/
+          predicates:
+            - name: PathRoutePredicateFactory
+              args:
+                patterns: /hb/**
+            - name: ReadBodyPredicateFactory
+              args:
+                inClass: "#{T(String)}"
+                predicate: "#{@alwaysReadRequestBody}"
+          filters:
+            - RewritePath=/hb/(?<segment>.*), /$\{segment}
+      discovery:
+        locator:
+          enabled: true
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eproject.eureka.domain}/eureka-service/eureka
+
+logging:
+  level:
+    ROOT: ERROR
+
+project:
+  version:
+    serviceUrl: http://${eproject.version.domain}/version-service/v1/versions

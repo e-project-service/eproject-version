@@ -1,0 +1,12 @@
+include 'eproject-version-client'
+include 'eproject-version-server'
+include 'eproject-version-boot'
+include 'eproject-version-gateway'
+include 'eproject-version-model'
+
+rootProject.name = "${projectName}"
+project(':eproject-version-client').projectDir = new File('client')
+project(':eproject-version-server').projectDir = new File('server')
+project(':eproject-version-boot').projectDir = new File('boot')
+project(':eproject-version-gateway').projectDir = new File('gateway')
+project(':eproject-version-model').projectDir = new File('model')

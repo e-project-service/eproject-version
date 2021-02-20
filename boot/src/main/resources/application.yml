@@ -1,0 +1,122 @@
+
+
+---
+
+spring:
+  profiles: dev
+
+eproject:
+  db:
+    host: mongo.eproject.local
+    port: 27017
+    domain: ${eproject.db.host}:${eproject.db.port}
+  auth:
+    domain: auth.eproject.local:16666
+  admin:
+    domain: admin.eproject.local:2333
+  eureka:
+    domain: eureka.eproject.local:2337
+
+logging:
+  level:
+    ROOT: DEBUG
+    org.springframework.data.mongodb: DEBUG
+
+
+---
+
+spring:
+  profiles: test
+
+eproject:
+  db:
+    host: mongo.eproject.com
+    port: 27017
+    domain: ${eproject.db.host}:${eproject.db.port}
+  auth:
+    domain: auth.eproject.com:16666
+  admin:
+    domain: admin.eproject.com:2333
+  eureka:
+    domain: eureka.eproject.com:2337
+
+logging:
+  level:
+    ROOT: INFO
+
+
+---
+
+spring:
+  profiles: prod
+
+eproject:
+  db:
+    host: mongodb.eproject.com
+    port: 27017
+    domain: ${eproject.db.host}:${eproject.db.port}
+  auth:
+    domain: admin.eproject.com:16666
+  admin:
+    domain: admin.eproject.com:2333
+  eureka:
+    domain: eureka.eproject.com:2337
+
+
+---
+
+spring:
+  profiles: docker
+
+eproject:
+  db:
+    host: eproject-mongodb
+    port: 27017
+    domain: ${eproject.db.host}:${eproject.db.port}
+  auth:
+    domain: auth.eproject.eproject.dev:19000
+  admin:
+    domain: eproject-admin:2333
+  eureka:
+    domain: eproject-eureka:2337
+
+
+---
+
+server:
+  port: 2340
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+spring:
+  application:
+    name: eProject-Version
+  boot:
+    admin:
+      client:
+        url: http://${eproject.admin.domain}/admin-service
+        api-path: /api/applications
+  webflux:
+    base-path: /version-service
+  data:
+    mongodb:
+      username: xy
+      password: XY@dev1024
+      host: ${eproject.db.host}
+      port: ${eproject.db.port}
+      database: eproject-version
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://${eproject.eureka.domain}/eureka-service/eureka
+
+logging:
+  level:
+    ROOT: ERROR
