@@ -105,7 +105,6 @@ project(':eproject-version-server') {
 
 project(':eproject-version-boot') {
 
-    apply plugin: 'maven'
     apply plugin: 'org.springframework.boot'
     apply plugin: "io.spring.dependency-management"
     apply plugin: 'com.github.ksoichiro.build.info'
@@ -197,7 +196,6 @@ project(':eproject-version-boot') {
 
 project(':eproject-version-gateway') {
 
-    apply plugin: 'maven'
     apply plugin: 'org.springframework.boot'
     apply plugin: "io.spring.dependency-management"
     apply plugin: 'com.github.ksoichiro.build.info'
