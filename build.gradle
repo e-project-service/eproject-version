@@ -51,6 +51,7 @@ allprojects {
 project(':eproject-version-client') {
 
     apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     apply plugin: 'org.springframework.boot'
     apply plugin: "io.spring.dependency-management"
 
@@ -77,6 +78,7 @@ project(':eproject-version-client') {
 project(':eproject-version-server') {
 
     apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     apply plugin: 'org.springframework.boot'
     apply plugin: "io.spring.dependency-management"
 
@@ -283,6 +285,7 @@ project(':eproject-version-gateway') {
 project(':eproject-version-model') {
 
     apply plugin: 'maven'
+    apply plugin: 'maven-publish'
     apply plugin: 'com.github.ksoichiro.build.info'
 
     group 'com.github.xiaoyao9184.eproject'
