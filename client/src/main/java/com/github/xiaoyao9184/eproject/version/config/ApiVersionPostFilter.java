@@ -35,6 +35,10 @@ public class ApiVersionPostFilter extends ApiVersionFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        if(skip(exchange)){
+            return chain.filter(exchange);
+        }
+
         ServerHttpRequest req = exchange.getRequest();
         if(req.getMethod() != method()){
             return chain.filter(exchange);

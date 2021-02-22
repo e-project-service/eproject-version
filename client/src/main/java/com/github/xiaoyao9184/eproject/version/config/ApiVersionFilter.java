@@ -4,6 +4,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
+import org.springframework.cloud.gateway.route.Route;
+import org.springframework.cloud.gateway.support.ServerWebExchangeUtils;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -15,6 +17,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Mono;
 
 import java.net.URI;
+import java.util.Optional;
 
 /**
  * Created by xy on 2021/2/3.
@@ -32,6 +35,10 @@ public abstract class ApiVersionFilter implements GlobalFilter {
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
+        if(skip(exchange)){
+            return chain.filter(exchange);
+        }
+
         ServerHttpRequest req = exchange.getRequest();
         if(req.getMethod() != method()){
             return chain.filter(exchange);
@@ -91,6 +98,18 @@ public abstract class ApiVersionFilter implements GlobalFilter {
                 .bodyValue(body)
                 .exchange()
                 .flatMap(clientResponse -> clientResponse.bodyToMono(String.class));
+    }
+
+    protected boolean skip(ServerWebExchange exchange) {
+        Route route = exchange.getAttribute(ServerWebExchangeUtils.GATEWAY_ROUTE_ATTR);
+        boolean isEnable = apiVersionProperties.getDownstreamServices()
+                .stream()
+                .filter(ds -> ds.getName() != null)
+                .filter(ds -> ds.getName().equalsIgnoreCase(route.getId()))
+                .findFirst()
+                .map(ApiVersionProperties.DownstreamService::isEnable)
+                .orElse(false);
+        return !isEnable;
     }
 
     abstract HttpStatus code();

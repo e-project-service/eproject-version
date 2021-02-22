@@ -128,4 +128,9 @@ logging:
 
 project:
   version:
-    serviceUrl: http://${eproject.version.domain}/version-service/v1/versions
+    service-url: http://${eproject.version.domain}/version-service/v1/versions
+    downstream-services:
+      - name: eProject-Attach
+        enable: false
+      - name: eProject-FileTable
+        enable: false
