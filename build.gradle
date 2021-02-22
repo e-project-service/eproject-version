@@ -53,6 +53,7 @@ project(':eproject-version-client') {
     apply plugin: 'maven'
     apply plugin: 'maven-publish'
     apply plugin: "io.spring.dependency-management"
+    apply plugin: 'propdeps'
 
     group 'com.github.xiaoyao9184.eproject'
     version "${version}"
@@ -62,6 +63,7 @@ project(':eproject-version-client') {
         implementation 'org.springframework.cloud:spring-cloud-starter-gateway'
         //Boot
 //        implementation "org.springframework.boot:spring-boot-starter-hateoas:${springBootVersion}"
+        optional 'org.springframework.boot:spring-boot-configuration-processor'
 
         testCompile group: 'junit', name: 'junit', version: '4.12'
     }
