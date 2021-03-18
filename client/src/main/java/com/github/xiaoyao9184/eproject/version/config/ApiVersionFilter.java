@@ -27,26 +27,27 @@ public abstract class ApiVersionFilter implements GlobalFilter {
 
     private WebClient webClient;
     private ApiVersionProperties apiVersionProperties;
+    protected ApiVersionPrincipalProvider apiVersionPrincipalProvider;
 
-    public ApiVersionFilter(WebClient webClient, ApiVersionProperties apiVersionProperties) {
+    public ApiVersionFilter(WebClient webClient, ApiVersionProperties apiVersionProperties,
+                            ApiVersionPrincipalProvider apiVersionPrincipalProvider) {
         this.webClient = webClient;
         this.apiVersionProperties = apiVersionProperties;
+        this.apiVersionPrincipalProvider = apiVersionPrincipalProvider;
     }
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         if(skip(exchange)){
+            logger.debug("skip version filter!");
             return chain.filter(exchange);
         }
-
-        ServerHttpRequest req = exchange.getRequest();
-        if(req.getMethod() != method()){
-            return chain.filter(exchange);
-        }
-        logger.debug("Http method matched!");
 
         //call real api
-        return chain.filter(exchange).then(Mono.defer(() -> {
+        return chain.filter(exchange)
+                .then(apiVersionPrincipalProvider.provide(exchange, chain))
+                .flatMap(user -> {
+            ServerHttpRequest req = exchange.getRequest();
             ServerHttpResponse res = exchange.getResponse();
             //get request body
             String body = exchange.getAttribute("cachedRequestBodyObject");
@@ -58,7 +59,8 @@ public abstract class ApiVersionFilter implements GlobalFilter {
                     return send(
                             method(),
                             location,
-                            exchange.getResponse().getHeaders(),
+                            user,
+                            this.header(exchange.getRequest().getHeaders(),exchange.getResponse().getHeaders()),
                             body)
                             .then();
                 } else {
@@ -73,7 +75,7 @@ public abstract class ApiVersionFilter implements GlobalFilter {
                         this.code().toString());
             }
             return Mono.empty();
-        }));
+        });
     }
 
     /**
@@ -86,10 +88,16 @@ public abstract class ApiVersionFilter implements GlobalFilter {
      */
     protected Mono<String> send(HttpMethod method,
                                 URI location,
+                                String user,
                                 HttpHeaders httpHeaders,
                                 String body){
-        URI uri = UriComponentsBuilder.fromUriString(this.apiVersionProperties.getServiceUrl())
-                .path(location.getPath())
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(this.apiVersionProperties.getServiceUrl())
+                .path(location.getPath());
+        if(this.apiVersionProperties.getForward().isPrincipalName()){
+            //get user name of principal
+            builder.queryParam(this.apiVersionProperties.getForward().getPrincipalNameQueryParam(),user);
+        }
+        URI uri = builder
                 .build()
                 .toUri();
         return this.webClient.method(method)
@@ -109,7 +117,29 @@ public abstract class ApiVersionFilter implements GlobalFilter {
                 .findFirst()
                 .map(ApiVersionProperties.DownstreamService::isEnable)
                 .orElse(false);
-        return !isEnable;
+
+        ServerHttpRequest req = exchange.getRequest();
+        boolean matchMethod = req.getMethod() == method();
+
+        return !isEnable || !matchMethod;
+    }
+
+    protected HttpHeaders header(HttpHeaders requestHeaders, HttpHeaders responseHeaders){
+        HttpHeaders result = new HttpHeaders();
+
+        requestHeaders.entrySet().stream()
+                .filter(kv ->
+                        this.apiVersionProperties.getForward().isRequestHeadersAll() ||
+                        this.apiVersionProperties.getForward().getRequestHeaders().contains(kv.getKey()))
+                .forEach(kv -> result.addAll(kv.getKey(),kv.getValue()));
+
+        responseHeaders.entrySet().stream()
+                .filter(kv ->
+                        this.apiVersionProperties.getForward().isResponseHeadersAll() ||
+                        this.apiVersionProperties.getForward().getResponseHeaders().contains(kv.getKey()))
+                .forEach(kv -> result.addAll(kv.getKey(),kv.getValue()));
+
+        return result;
     }
 
     abstract HttpStatus code();

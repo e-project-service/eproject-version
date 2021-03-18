@@ -221,9 +221,14 @@ project(':eproject-version-gateway') {
 
         //Boot
         implementation 'org.springframework.boot:spring-boot-starter-actuator'
+        implementation 'org.springframework.boot:spring-boot-starter-security'
+        implementation 'org.springframework.boot:spring-boot-starter-oauth2-resource-server'
 
         //BootAdmin
-        compile "de.codecentric:spring-boot-admin-starter-client:${springBootAdminVersion}"
+        implementation "de.codecentric:spring-boot-admin-starter-client:${springBootAdminVersion}"
+
+        //security-oauth2-client-authentication
+        implementation 'com.github.xiaoyao9184.spring-security-expansion:security-oauth2-client-authentication:master-SNAPSHOT'
 
         //Project
         implementation(project(':eproject-version-client'))

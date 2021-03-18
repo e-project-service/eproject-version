@@ -13,11 +13,12 @@ spring:
 
 eproject:
   auth:
-    domain: auth.eproject.local:16666
+    domain: me:8080
+    context-path: /uaa
   admin:
-    domain: admin.eproject.local:2333
+    domain: me:2333
   eureka:
-    domain: eureka.eproject.local:2337
+    domain: me:2335
   version:
     domain: me:2340
 
@@ -35,10 +36,11 @@ spring:
 eproject:
   auth:
     domain: auth.eproject.com:16666
+    context-path: /
   admin:
     domain: admin.eproject.com:2333
   eureka:
-    domain: eureka.eproject.com:2337
+    domain: eureka.eproject.com:2335
   version:
     domain: version.eproject.com:2340
 
@@ -55,10 +57,11 @@ spring:
 eproject:
   auth:
     domain: auth.eproject.com:16666
+    context-path: /
   admin:
     domain: admin.eproject.com:2333
   eureka:
-    domain: eureka.eproject.com:2337
+    domain: eureka.eproject.com:2335
   version:
     domain: version.eproject.com:2340
 
@@ -70,10 +73,11 @@ spring:
 eproject:
   auth:
     domain: auth.eproject.com:16666
+    context-path: /
   admin:
     domain: eproject-admin:2333
   eureka:
-    domain: eproject-eureka:2337
+    domain: eproject-eureka:2335
   version:
     domain: eproject-version:2340
 
@@ -95,14 +99,20 @@ spring:
     admin:
       client:
         url: http://${eproject.admin.domain}/admin-service
-        apiPath: /api/applications
+        instance:
+          metadata:
+            user.name: ${spring.security.user.name}
+            user.password: ${spring.security.user.password}
+          service-path: ${spring.webflux.base-path}
+  webflux:
+    base-path: /
   cloud:
     gateway:
       routes:
         - id: hb
           uri: http://httpbin.org/
           predicates:
-            - name: PathRoutePredicateFactory
+            - name: Path
               args:
                 patterns: /hb/**
             - name: ReadBodyPredicateFactory
@@ -114,6 +124,79 @@ spring:
       discovery:
         locator:
           enabled: true
+  security:
+    user:
+      roles: ACTUATOR,DEV
+      name: dev
+      password: XY@dev1024
+    oauth2:
+      client:
+        registration:
+          auth-sso:
+            provider: uaa
+            client-id: eProject-Version
+            client-secret: version123
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/"
+            client-name: sso
+            scope:
+              - openid
+              - version.admin
+          auth-client-auth-code:
+            provider: uaa
+            client-id: eProject-Version
+            client-secret: version123
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/client/{registrationId}"
+            client-name: authorization_code
+            scope:
+              - openid
+              - version.read
+          auth-client-implicit:
+            provider: uaa
+            client-id: eProject-Version
+            client-secret: version123
+            authorization-grant-type: implicit
+            #set to UI html
+            redirect-uri: "{baseUrl}/token.html"
+            client-name: implicit
+            scope:
+              - openid
+              - version.read
+          auth-client-client-creds:
+            provider: uaa
+            client-id: eProject-Version
+            client-secret: version123
+            authorization-grant-type: client_credentials
+            client-name: client_credentials
+            redirect-uri: "{baseUrl}/login/oauth2/client/{registrationId}"
+            authority: DEV
+          auth-client-password:
+            provider: uaa
+            client-id: eProject-Version
+            client-secret: version123
+            authorization-grant-type: password
+            client-name: password
+            redirect-uri: "{baseUrl}/login/oauth2/client/{registrationId}"
+            scope:
+              - openid
+              - version.admin
+        provider:
+          uaa:
+#            authorization-uri: http://${eproject.auth.domain}${eproject.auth.context-path}/oauth/authorize
+#            token-uri: http://${eproject.auth.domain}${eproject.auth.context-path}/oauth/token
+#            jwk-set-uri: http://${eproject.auth.domain}${eproject.auth.context-path}/token_keys
+#            user-info-uri: http://${eproject.auth.domain}${eproject.auth.context-path}/userinfo
+            user-name-attribute: user_name
+            issuer-uri: http://${eproject.auth.domain}${eproject.auth.context-path}/oauth/token
+      resourceserver:
+        jwt:
+          jwk-set-uri: http://${eproject.auth.domain}${eproject.auth.context-path}/token_keys
+          issuer-uri: http://${eproject.auth.domain}${eproject.auth.context-path}/oauth/token
+        opaquetoken:
+          client-id: eProject-Version
+          client-secret: version123
+          introspection-uri: http://${eproject.auth.domain}${eproject.auth.context-path}/oauth/check_token
 
 eureka:
   client:
@@ -134,3 +217,5 @@ project:
         enable: false
       - name: eProject-FileTable
         enable: false
+      - name: hb
+        enable: true

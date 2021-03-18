@@ -19,8 +19,9 @@ import java.net.URI;
 public class ApiVersionPostFilter extends ApiVersionFilter {
     private static Logger logger = LoggerFactory.getLogger(ApiVersionPostFilter.class);
 
-    public ApiVersionPostFilter(WebClient webClient, ApiVersionProperties apiVersionProperties) {
-        super(webClient,apiVersionProperties);
+    public ApiVersionPostFilter(WebClient webClient, ApiVersionProperties apiVersionProperties,
+                                ApiVersionPrincipalProvider apiVersionPrincipalProvider) {
+        super(webClient,apiVersionProperties,apiVersionPrincipalProvider);
     }
 
     @Override
@@ -36,20 +37,19 @@ public class ApiVersionPostFilter extends ApiVersionFilter {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         if(skip(exchange)){
+            logger.debug("skip version filter!");
             return chain.filter(exchange);
         }
-
-        ServerHttpRequest req = exchange.getRequest();
-        if(req.getMethod() != method()){
-            return chain.filter(exchange);
-        }
-        logger.debug("Http method matched!");
 
         //call real api
-        return chain.filter(exchange).then(Mono.defer(() -> {
+        return chain.filter(exchange)
+                .then(apiVersionPrincipalProvider.provide(exchange, chain))
+                .flatMap(user -> {
+            ServerHttpRequest req = exchange.getRequest();
             ServerHttpResponse res = exchange.getResponse();
             //get request body
             String body = exchange.getAttribute("cachedRequestBodyObject");
+//            String user = apiVersionPrincipalProvider.provide(exchange, chain);
             if(res.getStatusCode() == code() &&
                     body != null){
                 //maybe use response body HATEOAS self url
@@ -58,7 +58,8 @@ public class ApiVersionPostFilter extends ApiVersionFilter {
                     return send(
                             method(),
                             location,
-                            exchange.getResponse().getHeaders(),
+                            user,
+                            this.header(exchange.getRequest().getHeaders(), exchange.getResponse().getHeaders()),
                             body)
                             .then();
                 } else {
@@ -73,6 +74,6 @@ public class ApiVersionPostFilter extends ApiVersionFilter {
                         this.code().toString());
             }
             return Mono.empty();
-        }));
+        });
     }
 }

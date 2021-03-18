@@ -18,6 +18,11 @@ public class ApiVersionProperties {
     private String serviceUrl = "";
 
     /**
+     * forward to version service
+     */
+    private Forward forward = new Forward();
+
+    /**
      * downstream service options
      */
     private List<DownstreamService> downstreamServices = new ArrayList<>();
@@ -30,12 +35,101 @@ public class ApiVersionProperties {
         this.serviceUrl = serviceUrl;
     }
 
+    public Forward getForward() {
+        return forward;
+    }
+
+    public void setForward(Forward forward) {
+        this.forward = forward;
+    }
+
     public List<DownstreamService> getDownstreamServices() {
         return downstreamServices;
     }
 
     public void setDownstreamServices(List<DownstreamService> downstreamServices) {
         this.downstreamServices = downstreamServices;
+    }
+
+    public static class Forward {
+
+        /**
+         * all request headers need to forward
+         */
+        private boolean requestHeadersAll = false;
+
+        /**
+         * request headers whitelist to forward
+         */
+        private List<String> requestHeaders = Arrays.asList("Authorization");
+
+        /**
+         * all response headers need to forward
+         */
+        private boolean responseHeadersAll = true;
+
+        /**
+         * response headers whitelist to forward
+         */
+        private List<String> responseHeaders = new ArrayList<>();
+
+        /**
+         * forward user-name of security principal
+         */
+        private boolean principalName = false;
+
+        /**
+         * user
+         */
+        private String principalNameQueryParam = "user";
+
+        public boolean isRequestHeadersAll() {
+            return requestHeadersAll;
+        }
+
+        public void setRequestHeadersAll(boolean requestHeadersAll) {
+            this.requestHeadersAll = requestHeadersAll;
+        }
+
+        public List<String> getRequestHeaders() {
+            return requestHeaders;
+        }
+
+        public void setRequestHeaders(List<String> requestHeaders) {
+            this.requestHeaders = requestHeaders;
+        }
+
+        public boolean isResponseHeadersAll() {
+            return responseHeadersAll;
+        }
+
+        public void setResponseHeadersAll(boolean responseHeadersAll) {
+            this.responseHeadersAll = responseHeadersAll;
+        }
+
+        public List<String> getResponseHeaders() {
+            return responseHeaders;
+        }
+
+        public void setResponseHeaders(List<String> responseHeaders) {
+            this.responseHeaders = responseHeaders;
+        }
+
+        public boolean isPrincipalName() {
+            return principalName;
+        }
+
+        public void setPrincipalName(boolean principalName) {
+            this.principalName = principalName;
+        }
+
+        public String getPrincipalNameQueryParam() {
+            return principalNameQueryParam;
+        }
+
+        public void setPrincipalNameQueryParam(String principalNameQueryParam) {
+            this.principalNameQueryParam = principalNameQueryParam;
+        }
     }
 
     public static class DownstreamService {

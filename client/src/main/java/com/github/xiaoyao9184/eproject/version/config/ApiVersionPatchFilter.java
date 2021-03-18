@@ -9,8 +9,9 @@ import org.springframework.web.reactive.function.client.WebClient;
  */
 public class ApiVersionPatchFilter extends ApiVersionFilter {
 
-    public ApiVersionPatchFilter(WebClient webClient, ApiVersionProperties apiVersionProperties) {
-        super(webClient,apiVersionProperties);
+    public ApiVersionPatchFilter(WebClient webClient, ApiVersionProperties apiVersionProperties,
+                                 ApiVersionPrincipalProvider apiVersionPrincipalProvider) {
+        super(webClient,apiVersionProperties,apiVersionPrincipalProvider);
     }
 
     @Override
@@ -20,6 +21,6 @@ public class ApiVersionPatchFilter extends ApiVersionFilter {
 
     @Override
     HttpMethod method() {
-        return HttpMethod.PUT;
+        return HttpMethod.PATCH;
     }
 }

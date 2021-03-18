@@ -36,6 +36,7 @@ public class ApiVersionAutoConfiguration {
         }
     }
 
+    //TODO use Autowired
     public WebClient webClient(Environment environment){
         WebClient.Builder builder = WebClient.builder();
         Boolean proxySet = environment.getProperty("proxySet", Boolean.class, false);
@@ -58,33 +59,37 @@ public class ApiVersionAutoConfiguration {
     @Bean
     @ConditionalOnMissingBean
     public ApiVersionPostFilter apiVersionPostFilter(
+            ApiVersionPrincipalProvider apiVersionPrincipalProvider,
             ApiVersionProperties apiVersionProperties, Environment environment
     ){
-        return new ApiVersionPostFilter(webClient(environment),apiVersionProperties);
+        return new ApiVersionPostFilter(webClient(environment),apiVersionProperties,apiVersionPrincipalProvider);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ApiVersionPutFilter apiVersionPutFilter(
+            ApiVersionPrincipalProvider apiVersionPrincipalProvider,
             ApiVersionProperties apiVersionProperties, Environment environment
     ){
-        return new ApiVersionPutFilter(webClient(environment),apiVersionProperties);
+        return new ApiVersionPutFilter(webClient(environment),apiVersionProperties,apiVersionPrincipalProvider);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ApiVersionPatchFilter apiVersionPatchFilter(
+            ApiVersionPrincipalProvider apiVersionPrincipalProvider,
             ApiVersionProperties apiVersionProperties, Environment environment
     ){
-        return new ApiVersionPatchFilter(webClient(environment),apiVersionProperties);
+        return new ApiVersionPatchFilter(webClient(environment),apiVersionProperties,apiVersionPrincipalProvider);
     }
 
     @Bean
     @ConditionalOnMissingBean
     public ApiVersionDeleteFilter apiVersionDeleteFilter(
+            ApiVersionPrincipalProvider apiVersionPrincipalProvider,
             ApiVersionProperties apiVersionProperties, Environment environment
     ){
-        return new ApiVersionDeleteFilter(webClient(environment),apiVersionProperties);
+        return new ApiVersionDeleteFilter(webClient(environment),apiVersionProperties,apiVersionPrincipalProvider);
     }
 
     @Bean
