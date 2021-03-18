@@ -133,6 +133,9 @@ project(':eproject-version-boot') {
         //BootAdmin
         implementation "de.codecentric:spring-boot-admin-starter-client:${springBootAdminVersion}"
 
+        //Jolokia
+        implementation 'org.jolokia:jolokia-core'
+
         //security-oauth2-client-authentication
         implementation 'com.github.xiaoyao9184.spring-security-expansion:security-oauth2-client-authentication:master-SNAPSHOT'
 
@@ -226,6 +229,9 @@ project(':eproject-version-gateway') {
 
         //BootAdmin
         implementation "de.codecentric:spring-boot-admin-starter-client:${springBootAdminVersion}"
+
+        //Jolokia
+        implementation 'org.jolokia:jolokia-core'
 
         //security-oauth2-client-authentication
         implementation 'com.github.xiaoyao9184.spring-security-expansion:security-oauth2-client-authentication:master-SNAPSHOT'
