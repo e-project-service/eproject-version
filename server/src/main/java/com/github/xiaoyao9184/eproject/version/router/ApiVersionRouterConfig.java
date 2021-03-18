@@ -1,5 +1,6 @@
 package com.github.xiaoyao9184.eproject.version.router;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.reactive.WebFluxProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -7,6 +8,7 @@ import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.server.RouterFunction;
 import org.springframework.web.reactive.function.server.RouterFunctions;
 import org.springframework.web.reactive.function.server.ServerResponse;
+import reactor.core.publisher.Mono;
 
 import static com.github.xiaoyao9184.eproject.version.router.ApiVersionHandler.API_PATH;
 import static org.springframework.web.reactive.function.server.RequestPredicates.accept;
@@ -17,6 +19,12 @@ import static org.springframework.web.reactive.function.server.RequestPredicates
  */
 @Configuration
 public class ApiVersionRouterConfig {
+
+    @Bean
+    @ConditionalOnMissingBean
+    public ApiVersionUserProvider apiVersionUserProvider(){
+        return (request) -> Mono.just("none");
+    }
 
     @Bean
     public ApiVersionHandler apiVersionHandler(){
